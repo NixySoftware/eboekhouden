@@ -8,6 +8,6 @@ description = "OpenAPI client for e-Boekhouden."
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/NixySoftware/eboekhouden"
-version = "1.0.1"
+version = "1.0.2"
 
 [workspace.dependencies]
