@@ -1,0 +1,491 @@
+/*
+ * e-Boekhouden API
+ *
+ * ### Quick Start    1. If you haven't already, first create an API-token on the website.     API-tokens can be managed in the settings of your account.       Make sure to save your token somewhere secure, as it will not be shown again after creation.  2. Send a POST request to the `/v1/session` endpoint with your API-token. This creates a short-lived session token.       <em>Tip: A unique source can help us troubleshoot problems quicker when contacting support.  </em>     ```json     {       \"accessToken\": \"API_TOKEN\",       \"source\": \"Postman\"     }     ```  3. Include the session token from the response in your request headers to access the rest of the API.       ```     Authorization: SESSION_TOKEN     ```    ### Filters    Various parameters support filters. These can be identified with the format `($filter-type)`, where `type` is a known [OAS type format](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#data-types).    Currently only one filter can be applied to a parameter.    <details>  <summary>Strings</summary>    #### Strings (`$filter-string`)    <div data-table-slim>    | Filter | Syntax | Example |  |---|---|---|  | Equal* | `[eq]` | `?parameter=value` |  | Not equal | `[not_eq]` | `?parameter[not_eq]=value` |  | Like** | `[like]` | `?parameter[like]=%25value%25` |  | Not like** | `[not_like]` | `?parameter[not_like]=%25value%25` |    </div>    <sub>\\* Equal is used as the default filter if none is given.</sub><br/>  <sub>\\*\\* Wildcards `?` (one character) and `%` (multiple characters) may be used. Keep in mind these must be escaped when used in a query.</sub>    </details>    <details>  <summary>Numbers</summary>    #### Numbers (`$filter-int32`, `$filter-int64`)    <div data-table-slim>    | Filter | Syntax | Example |  |---|---|---|  | Equal* | `[eq]` | `?parameter=5` |  | Not equal | `[not_eq]` | `?parameter[not_eq]=5` |  | Greater than | `[gt]` | `?parameter[gt]=5` |  | Greater than or equal to | `[gte]` | `?parameter[gte]=5` |  | Less than | `[lt]` | `?parameter[lt]=5` |  | Less than or equal to | `[lte]` | `?parameter[lte]=5` |  | Range** | `[range]` | `?parameter[range]=5,10` |    </div>    <sub>\\* Equal is used as the default filter if none is given.</sub>    <sub>\\*\\* Values are inclusive.</sub>    </details>    <details>  <summary>Dates</summary>    #### Dates (`$filter-date`)    <div data-table-slim>    | Filter | Syntax | Example |  |---|---|---|  | Equal* | `[eq]` | `?parameter=2025-01-01` |  | Not equal | `[not_eq]` | `?parameter[not_eq]=2025-01-01` |  | Greater than | `[gt]` | `?parameter[gt]=2025-01-01` |  | Greater than or equal to | `[gte]` | `?parameter[gte]=2025-01-01` |  | Less than | `[lt]` | `?parameter[lt]=2025-01-01` |  | Less than or equal to | `[lte]` | `?parameter[lte]=2025-01-01` |  | Range** | `[range]` | `?parameter[range]=2025-01-01,2025-12-31` |    </div>    <sub>\\* Equal is used as the default filter if none is given.</sub>    <sub>\\*\\* Values are inclusive.</sub>    </details>    ### Paging    Most search endpoints have an optional `limit` and `offset` parameter.    The parameter `limit` defaults to 100 and must be an integer between 1 and 2000.    The parameter `offset` defaults to 0 and must be a positive integer.      ### Dates    Some endpoints accept or return date properties. These should always follow the ISO 8601 format.    The format is `YYYY-MM-DD` for dates.      ### VAT codes    Some endpoints accept or return VAT codes. Please ensure that you only use VAT codes relevant to the country your company is registered in. </br>  The available VAT codes are as follows.    <details>  <summary>NL</summary>    | Code | Description | Rate | Type | Cut-off date |  |---|---|---|---|---|  | LAAG_VERK | VAT 6% | 6% | Sale | **2019-01-01** |  | LAAG_VERK_9 | VAT 9% | 9% | Sale | |  | HOOG_VERK_21 | VAT 21% | 21% | Sale | |  | AFW_VERK | Divergent | | Sale | |  | VERL_VERK | Reverse charge 21% | 21% | Sale | |  | VERL_VERK_L9 | Reverse charge 9% | 9% | Sale | |  | BU_EU_VERK | Delivery outside the EU 0% | 0% | Sale | |  | AFST_VERK | Distance selling within the EU 0% | 0% | Sale | |  | BI_EU_VERK_D | Services within the EU 0% | 0% | Sale | |  | LAAG_INK | VAT 6% | 6% | Purchase | **2019-01-01** |  | LAAG_INK_9 | VAT 9% | 9% | Purchase | |  | HOOG_INK_21 | VAT 21% | 21% | Purchase | |  | AFW | Divergent | | Purchase | |  | VERL_INK_L9 | Reverse charge 9% | 9% | Purchase | |  | VERL_INK_L | Reverse charge 6% | 6% | Purchase | **2019-01-01** |  | VERL_INK | Reverse charge 21% | 21% | Purchase | |  | BU_EU_INK | Delivery/services outside the EU 0% | 0% | Purchase | |  | BI_EU_VERK | Delivery within the EU 0% | 0% | Purchase | |  | BI_EU_INK | Delivery/services within the EU 0% | 0% | Purchase | |  | GEEN | No VAT | 0% | | |    </details>    <details>  <summary>BE</summary>    | Code | Description | Rate | Type | Cut-off date |  |---|---|---|---|---|  | BE_0_INK | Domestic purchase (0%) | 0% | Purchase | |  | BE_6_INK | Domestic purchase (6%) | 6% | Purchase | |  | BE_12_INK | Domestic purchase (12%) | 12% | Purchase | |  | BE_21_INK | Domestic purchase (21%) | 21% | Purchase | |  | BE_VERL_0_INK | Reverse charge (co-contractor 0%) | 0% | Purchase | |  | BE_VERL_6_INK | Reverse charge (co-contractor 6%) | 6% | Purchase | |  | BE_VERL_12_INK | Reverse charge (co-contractor 12%) | 12% | Purchase | |  | BE_VERL_21_INK | Reverse charge (co-contractor 21%) | 21% | Purchase | |  | BE_IC_D_0_INK | Intra-comm. service (EU 0%) | 0% | Purchase | |  | BE_IC_D_6_INK | Intra-comm. service (EU 6%) | 6% | Purchase | |  | BE_IC_D_12_INK | Intra-comm. service (EU 12%) | 12% | Purchase | |  | BE_IC_D_21_INK | Intra-comm. service (EU 21%) | 21% | Purchase | |  | BE_IC_0_INK | Intra-comm. goods (EU 0%) | 0% | Purchase | |  | BE_IC_6_INK | Intra-comm. goods (EU 6%) | 6% | Purchase | |  | BE_IC_12_INK | Intra-comm. goods (EU 12%) | 12% | Purchase | |  | BE_IC_21_INK | Intra-comm. goods (EU 21%) | 21% | Purchase | |  | BE_IMP_0_INK | Import reverse charge (0%) | 0% | Purchase | |  | BE_IMP_6_INK | Import reverse charge (6%) | 6% | Purchase | |  | BE_IMP_12_INK | Import reverse charge (12%) | 12% | Purchase | |  | BE_IMP_21_INK | Import reverse charge (21%) | 21% | Purchase | |  | BE_0_VERK | Domestic sale (0%) | 0% | Sale | |  | BE_6_VERK | Domestic sale (6%) | 6% | Sale | |  | BE_12_VERK | Domestic sale (12%) | 12% | Sale | |  | BE_21_VERK | Domestic sale (21%) | 21% | Sale | |  | BE_IC_D_VERK | Intra-comm. service (EU 0%) | 0% | Sale | |  | BE_VERL_VERK | Reverse charge (co-contractor 0%) | 0% | Sale | |  | BE_IC_VERK | Intra-comm. goods (EU 0%) | 0% | Sale | |  | BE_EXP_VERK | Export sale (0%) | 0% | Sale | |  | GEEN | No VAT | 0% | | |    </details>      ### Company registration number    The company registration number is a unique identifier for a company.  In the Netherlands this is the \"KVK-nummer\". In Belgium this is the \"ondernemingsnummer\".  ### Error Codes  Possible error codes thrown by endpoints. If the property `code` is present on an error response, it will contain one of these codes.  <details>  <summary>Error codes</summary>  <div data-table-slim><table>  <tr><td><a name=\"ERR_001\">ERR_001</a></td><td>Something went wrong.</td>  <tr><td><a name=\"ERR_002\">ERR_002</a></td><td>Your request contains an invalid value.</td>  <tr><td><a name=\"DATA_01\">DATA_01</a></td><td>No content body provided.</td>  <tr><td><a name=\"MODULE_001\">MODULE_001</a></td><td>The limit for the free trial of the accounting module has been reached.</td>  <tr><td><a name=\"MODULE_002\">MODULE_002</a></td><td>The limit for the free trial of the invoicing module has been reached.</td>  <tr><td><a name=\"PAGE_001\">PAGE_001</a></td><td>Limit must be between 1 and 2000.</td>  <tr><td><a name=\"PAGE_002\">PAGE_002</a></td><td>Offset must be greater than or equal to 0.</td>  <tr><td><a name=\"SECURITY_001\">SECURITY_001</a></td><td>No permission to access the requested resource.</td>  <tr><td><a name=\"SECURITY_002\">SECURITY_002</a></td><td>No administration has been opened in the current session.</td>  <tr><td><a name=\"SECURITY_003\">SECURITY_003</a></td><td>No access to the requested administration.</td>  <tr><td><a name=\"SECURITY_004\">SECURITY_004</a></td><td>The requested administration has not been activated.</td>  <tr><td><a name=\"SECURITY_005\">SECURITY_005</a></td><td>The requested administration is not available due to an overdue payment.</td>  <tr><td><a name=\"SECURITY_006\">SECURITY_006</a></td><td>The requested administration is not accessible. Please contact the adminstration or log in on the website.</td>  <tr><td><a name=\"SECURITY_007\">SECURITY_007</a></td><td>The period has been closed by your accountant and can not be changed.</td>  <tr><td><a name=\"SECURITY_008\">SECURITY_008</a></td><td>The period has been closed by your accountant and can not be reopened.</td>  <tr><td><a name=\"SECURITY_009\">SECURITY_009</a></td><td>Connections with other parties can only be managed when the administration has customer access enabled.</td>  <tr><td><a name=\"SECURITY_010\">SECURITY_010</a></td><td>Not authenticated. Check your Authorization header.</td>  <tr><td><a name=\"SECURITY_011\">SECURITY_011</a></td><td>This account is registered under a different domain. Please make sure you're using the API on the correct domain.</td>  <tr><td><a name=\"SECURITY_999\">SECURITY_999</a></td><td>Something went wrong during authentication.</td>  <tr><td><a name=\"SMTP_001\">SMTP_001</a></td><td>Sending the e-mail failed. Check your SMTP settings.</td>  <tr><td><a name=\"SMTP_002\">SMTP_002</a></td><td>Sending the e-mail failed. Check your SMTP settings.</td>  <tr><td><a name=\"SMTP_003\">SMTP_003</a></td><td>Sending the e-mail failed. Check your SMTP settings.</td>  <tr><td><a name=\"PAKKET_001\">PAKKET_001</a></td><td>Product limit reached.</td>  <tr><td><a name=\"PAKKET_002\">PAKKET_002</a></td><td>Product limit reached.</td>  <tr><td><a name=\"FACT_001\">FACT_001</a></td><td>Relation ID is missing.</td>  <tr><td><a name=\"FACT_002\">FACT_002</a></td><td>Relation not found.</td>  <tr><td><a name=\"FACT_003\">FACT_003</a></td><td>Relation is inactive.</td>  <tr><td><a name=\"FACT_004\">FACT_004</a></td><td>Total invoice amount too high.</td>  <tr><td><a name=\"FACT_005\">FACT_005</a></td><td>Total invoice amount too low.</td>  <tr><td><a name=\"FACT_006\">FACT_006</a></td><td>Invoice number is missing.</td>  <tr><td><a name=\"FACT_007\">FACT_007</a></td><td>Invoice number is too long.</td>  <tr><td><a name=\"FACT_008\">FACT_008</a></td><td>Invoice number is invalid.</td>  <tr><td><a name=\"FACT_009\">FACT_009</a></td><td>Invoice number does not end with a digit.</td>  <tr><td><a name=\"FACT_010\">FACT_010</a></td><td>Invoice VAT must be IN or EX.</td>  <tr><td><a name=\"FACT_011\">FACT_011</a></td><td>Invoice date is missing.</td>  <tr><td><a name=\"FACT_012\">FACT_012</a></td><td>Invoice date invalid.</td>  <tr><td><a name=\"FACT_013\">FACT_013</a></td><td>Invoice date out of range.</td>  <tr><td><a name=\"FACT_014\">FACT_014</a></td><td>Payment reference is too long.</td>  <tr><td><a name=\"FACT_015\">FACT_015</a></td><td>Term of payment is missing.</td>  <tr><td><a name=\"FACT_016\">FACT_016</a></td><td>Term of payment out of range.</td>  <tr><td><a name=\"FACT_017\">FACT_017</a></td><td>Invoice text is too long.</td>  <tr><td><a name=\"FACT_018\">FACT_018</a></td><td>Invoice template not found.</td>  <tr><td><a name=\"FACT_019\">FACT_019</a></td><td>Invoice items are missing.</td>  <tr><td><a name=\"FACT_020\">FACT_020</a></td><td>Email template not found.</td>  <tr><td><a name=\"FACT_021\">FACT_021</a></td><td>Invoice not found.</td>  <tr><td><a name=\"FACT_022\">FACT_022</a></td><td>Send to Peppol for relation without Peppol Id.</td>  <tr><td><a name=\"FACT_023\">FACT_023</a></td><td>Already sent to Peppol.</td>  <tr><td><a name=\"FACT_024\">FACT_024</a></td><td>Administration has no Peppol integration configured</td>  <tr><td><a name=\"FACT_101\">FACT_101</a></td><td>Invoice number is in use.</td>  <tr><td><a name=\"FACT_102\">FACT_102</a></td><td>The limit for the free trial of the invoicing module has been reached. Upgrade your subscription to continue invoicing without restrictions.</td>  <tr><td><a name=\"FACT_EMAIL_001\">FACT_EMAIL_001</a></td><td>Relation email is missing.</td>  <tr><td><a name=\"FACT_EMAIL_002\">FACT_EMAIL_002</a></td><td>Relation email is invalid.</td>  <tr><td><a name=\"FACT_EMAIL_003\">FACT_EMAIL_003</a></td><td>Relation email for invoices is invalid.</td>  <tr><td><a name=\"FACT_EMAIL_004\">FACT_EMAIL_004</a></td><td>Relation email for reminders is invalid.</td>  <tr><td><a name=\"FACT_EMAIL_005\">FACT_EMAIL_005</a></td><td>Something went wrong while attaching files to the email.</td>  <tr><td><a name=\"FACT_EMAIL_006\">FACT_EMAIL_006</a></td><td>Sender email is invalid.</td>  <tr><td><a name=\"FACT_EMAIL_007\">FACT_EMAIL_007</a></td><td>Relation email is missing.</td>  <tr><td><a name=\"FACT_EMAIL_008\">FACT_EMAIL_008</a></td><td>Relation email is invalid.</td>  <tr><td><a name=\"FACT_EMAIL_009\">FACT_EMAIL_009</a></td><td>CC email is invalid.</td>  <tr><td><a name=\"FACT_EMAIL_010\">FACT_EMAIL_010</a></td><td>BCC email is invalid.</td>  <tr><td><a name=\"FACT_EMAIL_011\">FACT_EMAIL_011</a></td><td>Email body is too long</td>  <tr><td><a name=\"FACT_EMAIL_012\">FACT_EMAIL_012</a></td><td>CC or BCC contains a duplicate address.</td>  <tr><td><a name=\"FACT_EMAIL_013\">FACT_EMAIL_013</a></td><td>Subject is missing.</td>  <tr><td><a name=\"FACT_EMAIL_014\">FACT_EMAIL_014</a></td><td>Body is missing.</td>  <tr><td><a name=\"FACT_INCASSO_001\">FACT_INCASSO_001</a></td><td>Mandate type is missing.</td>  <tr><td><a name=\"FACT_INCASSO_002\">FACT_INCASSO_002</a></td><td>Mandate type is invalid.</td>  <tr><td><a name=\"FACT_INCASSO_003\">FACT_INCASSO_003</a></td><td>Mandate ID is missing.</td>  <tr><td><a name=\"FACT_INCASSO_004\">FACT_INCASSO_004</a></td><td>Mandate ID is too long.</td>  <tr><td><a name=\"FACT_INCASSO_005\">FACT_INCASSO_005</a></td><td>Mandate signed date is missing.</td>  <tr><td><a name=\"FACT_INCASSO_006\">FACT_INCASSO_006</a></td><td>Mandate signed date is invalid.</td>  <tr><td><a name=\"FACT_INCASSO_007\">FACT_INCASSO_007</a></td><td>Mandate signed date out of range.</td>  <tr><td><a name=\"FACT_INCASSO_008\">FACT_INCASSO_008</a></td><td>IBAN is missing.</td>  <tr><td><a name=\"FACT_INCASSO_009\">FACT_INCASSO_009</a></td><td>IBAN is too long.</td>  <tr><td><a name=\"FACT_INCASSO_010\">FACT_INCASSO_010</a></td><td>IBAN is invalid.</td>  <tr><td><a name=\"FACT_INCASSO_011\">FACT_INCASSO_011</a></td><td>Name is too long.</td>  <tr><td><a name=\"FACT_INCASSO_012\">FACT_INCASSO_012</a></td><td>City is too long.</td>  <tr><td><a name=\"FACT_INCASSO_013\">FACT_INCASSO_013</a></td><td>Description line 1 is too long.</td>  <tr><td><a name=\"FACT_INCASSO_014\">FACT_INCASSO_014</a></td><td>Description line 2 is too long.</td>  <tr><td><a name=\"FACT_INCASSO_015\">FACT_INCASSO_015</a></td><td>Description line 3 is too long.</td>  <tr><td><a name=\"FACT_VERWERK_001\">FACT_VERWERK_001</a></td><td>Invoice date resides in a closed period.</td>  <tr><td><a name=\"FACT_VERWERK_002\">FACT_VERWERK_002</a></td><td>Description is too long.</td>  <tr><td><a name=\"FACT_VERWERK_003\">FACT_VERWERK_003</a></td><td>Payment reference is too long.</td>  <tr><td><a name=\"FACT_VERWERK_004\">FACT_VERWERK_004</a></td><td>Payment reference already exists.</td>  <tr><td><a name=\"FACT_SJAB_001\">FACT_SJAB_001</a></td><td>Name is missing.</td>  <tr><td><a name=\"FACT_SJAB_002\">FACT_SJAB_002</a></td><td>Name is too long.</td>  <tr><td><a name=\"FACT_SJAB_003\">FACT_SJAB_003</a></td><td>Type is missing.</td>  <tr><td><a name=\"FACT_SJAB_004\">FACT_SJAB_004</a></td><td>Type is invalid.</td>  <tr><td><a name=\"ADM_001\">ADM_001</a></td><td>Email administration is missing.</td>  <tr><td><a name=\"ADM_002\">ADM_002</a></td><td>Email administration is invalid.</td>  <tr><td><a name=\"EP_001\">EP_001</a></td><td>This endpoint is only available to accountants.</td>  <tr><td><a name=\"EP_002\">EP_002</a></td><td>This endpoint is not available for accountants.</td>  <tr><td><a name=\"FACT_ITEM_001\">FACT_ITEM_001</a></td><td>Description invoice item is missing.</td>  <tr><td><a name=\"FACT_ITEM_002\">FACT_ITEM_002</a></td><td>Description invoice item is too long.</td>  <tr><td><a name=\"FACT_ITEM_003\">FACT_ITEM_003</a></td><td>Code invoice item is too long.</td>  <tr><td><a name=\"FACT_ITEM_004\">FACT_ITEM_004</a></td><td>Price per unit excl. VAT is missing.</td>  <tr><td><a name=\"FACT_ITEM_005\">FACT_ITEM_005</a></td><td>Price per unit incl. VAT is missing.</td>  <tr><td><a name=\"FACT_ITEM_006\">FACT_ITEM_006</a></td><td>VAT code is missing.</td>  <tr><td><a name=\"FACT_ITEM_007\">FACT_ITEM_007</a></td><td>Ledger ID is missing</td>  <tr><td><a name=\"FACT_ITEM_008\">FACT_ITEM_008</a></td><td>Total price is too high.</td>  <tr><td><a name=\"FACT_ITEM_009\">FACT_ITEM_009</a></td><td>Total price is too low.</td>  <tr><td><a name=\"FACT_ITEM_010\">FACT_ITEM_010</a></td><td>Unit not found.</td>  <tr><td><a name=\"FACT_ITEM_011\">FACT_ITEM_011</a></td><td>Product not found.</td>  <tr><td><a name=\"FACT_ITEM_012\">FACT_ITEM_012</a></td><td>Ledger account not found.</td>  <tr><td><a name=\"FACT_ITEM_013\">FACT_ITEM_013</a></td><td>Discount amount cannot have a value when discount percentage is passed.</td>  <tr><td><a name=\"FACT_ITEM_014\">FACT_ITEM_014</a></td><td>Invalid VAT code.</td>  <tr><td><a name=\"FACT_ITEM_015\">FACT_ITEM_015</a></td><td>VAT amount must be used with VAT code: 'AFW_VERK'</td>  <tr><td><a name=\"REL_001\">REL_001</a></td><td>Relation type is invalid (B,P).</td>  <tr><td><a name=\"REL_002\">REL_002</a></td><td>Name is mandatory.</td>  <tr><td><a name=\"REL_003\">REL_003</a></td><td>Name is too long.</td>  <tr><td><a name=\"REL_004\">REL_004</a></td><td>Gender is invalid (m,v,a).</td>  <tr><td><a name=\"REL_005\">REL_005</a></td><td>Code is invalid.</td>  <tr><td><a name=\"REL_006\">REL_006</a></td><td>Code is too long.</td>  <tr><td><a name=\"REL_007\">REL_007</a></td><td>Iban is invalid.</td>  <tr><td><a name=\"REL_008\">REL_008</a></td><td>Company registration number must be numeric.</td>  <tr><td><a name=\"REL_009\">REL_009</a></td><td>Contact is too long.</td>  <tr><td><a name=\"REL_010\">REL_010</a></td><td>Salutation is too long.</td>  <tr><td><a name=\"REL_011\">REL_011</a></td><td>Address is too long.</td>  <tr><td><a name=\"REL_012\">REL_012</a></td><td>Postal code is too long.</td>  <tr><td><a name=\"REL_013\">REL_013</a></td><td>City is too long.</td>  <tr><td><a name=\"REL_014\">REL_014</a></td><td>Country is too long.</td>  <tr><td><a name=\"REL_015\">REL_015</a></td><td>Address 2 is too long.</td>  <tr><td><a name=\"REL_016\">REL_016</a></td><td>Postal code 2 is too long.</td>  <tr><td><a name=\"REL_017\">REL_017</a></td><td>City 2 is too long.</td>  <tr><td><a name=\"REL_018\">REL_018</a></td><td>Country 2 is too long.</td>  <tr><td><a name=\"REL_019\">REL_019</a></td><td>Phone is too long.</td>  <tr><td><a name=\"REL_020\">REL_020</a></td><td>Mobile is too long.</td>  <tr><td><a name=\"REL_021\">REL_021</a></td><td>Fax is too long.</td>  <tr><td><a name=\"REL_022\">REL_022</a></td><td>Email is too long.</td>  <tr><td><a name=\"REL_023\">REL_023</a></td><td>Email is invalid.</td>  <tr><td><a name=\"REL_024\">REL_024</a></td><td>Email invoice is too long.</td>  <tr><td><a name=\"REL_025\">REL_025</a></td><td>Email invoice is invalid.</td>  <tr><td><a name=\"REL_026\">REL_026</a></td><td>Email reminder is too long.</td>  <tr><td><a name=\"REL_027\">REL_027</a></td><td>Email reminder is invalid.</td>  <tr><td><a name=\"REL_028\">REL_028</a></td><td>Website is too long.</td>  <tr><td><a name=\"REL_029\">REL_029</a></td><td>Iban is too long.</td>  <tr><td><a name=\"REL_030\">REL_030</a></td><td>Term of payment too low.</td>  <tr><td><a name=\"REL_031\">REL_031</a></td><td>Term of payment too high.</td>  <tr><td><a name=\"REL_032\">REL_032</a></td><td>BIC is too long.</td>  <tr><td><a name=\"REL_033\">REL_033</a></td><td>Mandate type is too long.</td>  <tr><td><a name=\"REL_034\">REL_034</a></td><td>Mandate ID is too long.</td>  <tr><td><a name=\"REL_035\">REL_035</a></td><td>VAT number is too long.</td>  <tr><td><a name=\"REL_036\">REL_036</a></td><td>Soort is too long.</td>  <tr><td><a name=\"REL_037\">REL_037</a></td><td>Free text 1 is too long.</td>  <tr><td><a name=\"REL_038\">REL_038</a></td><td>Free text 2 is too long.</td>  <tr><td><a name=\"REL_039\">REL_039</a></td><td>Free text 3 is too long.</td>  <tr><td><a name=\"REL_040\">REL_040</a></td><td>Free text 4 is too long.</td>  <tr><td><a name=\"REL_041\">REL_041</a></td><td>Free text 5 is too long.</td>  <tr><td><a name=\"REL_042\">REL_042</a></td><td>Free text 6 is too long.</td>  <tr><td><a name=\"REL_043\">REL_043</a></td><td>Free text 7 is too long.</td>  <tr><td><a name=\"REL_044\">REL_044</a></td><td>Free text 8 is too long.</td>  <tr><td><a name=\"REL_045\">REL_045</a></td><td>Free text 9 is too long.</td>  <tr><td><a name=\"REL_046\">REL_046</a></td><td>Free text 10 is too long.</td>  <tr><td><a name=\"REL_047\">REL_047</a></td><td>Note too long.</td>  <tr><td><a name=\"REL_048\">REL_048</a></td><td>Ledger not found.</td>  <tr><td><a name=\"REL_049\">REL_049</a></td><td>Code already exists.</td>  <tr><td><a name=\"REL_050\">REL_050</a></td><td>Company registration number is too long.</td>  <tr><td><a name=\"REL_051\">REL_051</a></td><td>Mandate type is invalid (E,D).</td>  <tr><td><a name=\"REL_052\">REL_052</a></td><td>Mandate value is missing.</td>  <tr><td><a name=\"REL_054\">REL_054</a></td><td>Relation ID is missing.</td>  <tr><td><a name=\"REL_055\">REL_055</a></td><td>Relation not found.</td>  <tr><td><a name=\"REL_056\">REL_056</a></td><td>Peppol ID is only for companies.</td>  <tr><td><a name=\"REL_057\">REL_057</a></td><td>Peppol ID is invalid.</td>  <tr><td><a name=\"LEDG_001\">LEDG_001</a></td><td>Code is missing.</td>  <tr><td><a name=\"LEDG_002\">LEDG_002</a></td><td>Code is too long.</td>  <tr><td><a name=\"LEDG_003\">LEDG_003</a></td><td>Description is missing.</td>  <tr><td><a name=\"LEDG_004\">LEDG_004</a></td><td>Description is too long.</td>  <tr><td><a name=\"LEDG_005\">LEDG_005</a></td><td>Category is missing.</td>  <tr><td><a name=\"LEDG_007\">LEDG_007</a></td><td>Group is missing.</td>  <tr><td><a name=\"LEDG_009\">LEDG_009</a></td><td>Ledger ID is missing.</td>  <tr><td><a name=\"LEDG_010\">LEDG_010</a></td><td>Ledger category doesn't exist.</td>  <tr><td><a name=\"LEDG_011\">LEDG_011</a></td><td>Ledger not found.</td>  <tr><td><a name=\"LEDG_012\">LEDG_012</a></td><td>Ledger group doesn't exist.</td>  <tr><td><a name=\"LEDG_013\">LEDG_013</a></td><td>Ledger code already exists.</td>  <tr><td><a name=\"LEDG_014\">LEDG_014</a></td><td>The category of a ledger with booked mutations can not be changed.</td>  <tr><td><a name=\"LEDG_015\">LEDG_015</a></td><td>This ledger has booked mutations. The category can only be changed to 'BAL' or 'VW'.</td>  <tr><td><a name=\"LEDG_016\">LEDG_016</a></td><td>There has to be at least one ledger of each category.</td>  <tr><td><a name=\"LEDG_017\">LEDG_017</a></td><td>Ledger code is already in use as a group code.</td>  <tr><td><a name=\"LEDG_018\">LEDG_018</a></td><td>Ledger category is not allowed.</td>  <tr><td><a name=\"LEDG_019\">LEDG_019</a></td><td>Ledger category may not be modified.</td>  <tr><td><a name=\"COST_001\">COST_001</a></td><td>Cost Center not found.</td>  <tr><td><a name=\"COST_002\">COST_002</a></td><td>Cost center could not be deleted.</td>  <tr><td><a name=\"COST_003\">COST_003</a></td><td>Cost center description is required.</td>  <tr><td><a name=\"COST_004\">COST_004</a></td><td>Cost center description is too long.</td>  <tr><td><a name=\"COST_005\">COST_005</a></td><td>Cost center with this name already exists on this level of the tree.</td>  <tr><td><a name=\"COST_006\">COST_006</a></td><td>Cost center parent id cannot be changed.</td>  <tr><td><a name=\"COST_007\">COST_007</a></td><td>Cost center parent is not active.</td>  <tr><td><a name=\"COST_008\">COST_008</a></td><td>Cost center parent not found.</td>  <tr><td><a name=\"COST_009\">COST_009</a></td><td>Cost center cannot be deleted. A cost center exists below this cost center.</td>  <tr><td><a name=\"COST_010\">COST_010</a></td><td>Cost center cannot be deleted. This cost center is in use by an other cost center.</td>  <tr><td><a name=\"COST_011\">COST_011</a></td><td>Cost center fullPath is too long.</td>  <tr><td><a name=\"COST_012\">COST_012</a></td><td>Cost center description has invalid characters.</td>  <tr><td><a name=\"UUR_FACT_001\">UUR_FACT_001</a></td><td>Term of payment is missing.</td>  <tr><td><a name=\"MUTA_001\">MUTA_001</a></td><td>Ledger id is missing.</td>  <tr><td><a name=\"MUTA_002\">MUTA_002</a></td><td>Type is missing</td>  <tr><td><a name=\"MUTA_003\">MUTA_003</a></td><td>Vat amount must be used with vatCode: 'AFW' or 'AFW_VERK'</td>  <tr><td><a name=\"MUTA_004\">MUTA_004</a></td><td>Ledger ID for row is missing.</td>  <tr><td><a name=\"MUTA_005\">MUTA_005</a></td><td>In/Ex VAT is missing.</td>  <tr><td><a name=\"MUTA_006\">MUTA_006</a></td><td>Credit/Debit is missing.</td>  <tr><td><a name=\"MUTA_007\">MUTA_007</a></td><td>Credit/Debit must be 'C' or 'D'.</td>  <tr><td><a name=\"MUTA_008\">MUTA_008</a></td><td>Payment reference already exists.</td>  <tr><td><a name=\"MUTA_009\">MUTA_009</a></td><td>Type is unknown.</td>  <tr><td><a name=\"API_SESSION_001\">API_SESSION_001</a></td><td>Source is missing.</td>  <tr><td><a name=\"API_SESSION_002\">API_SESSION_002</a></td><td>Source does not match pattern.</td>  <tr><td><a name=\"API_SESSION_003\">API_SESSION_003</a></td><td>Access token is missing or empty.</td>  <tr><td><a name=\"API_SESSION_004\">API_SESSION_004</a></td><td>Access token has expired.</td>  <tr><td><a name=\"ART_001\">ART_001</a></td><td>Product not found.</td>  <tr><td><a name=\"ART_002\">ART_002</a></td><td>Product ID is missing.</td>  <tr><td><a name=\"ART_003\">ART_003</a></td><td>Product could not be deleted</td>  <tr><td><a name=\"ART_004\">ART_004</a></td><td>Product Code is missing.</td>  <tr><td><a name=\"ART_005\">ART_005</a></td><td>Product Description is missing.</td>  <tr><td><a name=\"ART_006\">ART_006</a></td><td>Product Ledger ID is missing.</td>  <tr><td><a name=\"ART_007\">ART_007</a></td><td>Product Code is too long.</td>  <tr><td><a name=\"ART_008\">ART_008</a></td><td>Product Description is too long.</td>  <tr><td><a name=\"ART_009\">ART_009</a></td><td>Product Ledger could not be found.</td>  <tr><td><a name=\"ART_010\">ART_010</a></td><td>Product Cost center is inactive.</td>  <tr><td><a name=\"ART_011\">ART_011</a></td><td>Product Unit could not be found.</td>  <tr><td><a name=\"ART_012\">ART_012</a></td><td>Product Group could not be found.</td>  <tr><td><a name=\"ART_013\">ART_013</a></td><td>Product VAT code could not be found.</td>  <tr><td><a name=\"ART_014\">ART_014</a></td><td>Invalid value provided for the Product UpdateSubscriptions option.</td>  <tr><td><a name=\"ART_015\">ART_015</a></td><td>Product cost center could not be found.</td>  <tr><td><a name=\"ART_016\">ART_016</a></td><td>priceIncl cannot have a value when priceExcl is passed.</td>  <tr><td><a name=\"ART_017\">ART_017</a></td><td>Product VAT code is required.</td>  <tr><td><a name=\"ART_018\">ART_018</a></td><td>Either priceExcl or priceIncl is required.</td>  <tr><td><a name=\"ART_019\">ART_019</a></td><td>Both priceExcl and priceIncl are required with current VAT code.</td>  <tr><td><a name=\"ART_020\">ART_020</a></td><td>priceIncl cannot be null or empty.</td>  <tr><td><a name=\"ART_021\">ART_021</a></td><td>priceExcl cannot be null or empty.</td>  <tr><td><a name=\"ART_022\">ART_022</a></td><td>VAT code cannot be null or empty.</td>  <tr><td><a name=\"ART_023\">ART_023</a></td><td>This VAT code cannot be used.</td>  <tr><td><a name=\"ART_024\">ART_024</a></td><td>The value of PriceExcl exceeds the maximum value of 999999999999.00.</td>  <tr><td><a name=\"ART_025\">ART_025</a></td><td>The value of PriceIncl exceeds the maximum value of 999999999999.00.</td>  <tr><td><a name=\"ART_026\">ART_026</a></td><td>The value of PriceIncl after applying VAT exceeds the maximum value of 999999999999.00.</td>  <tr><td><a name=\"ART_027\">ART_027</a></td><td>The value of PurchasePriceExcl exceeds the maximum value of 999999999999.00.</td>  <tr><td><a name=\"ART_028\">ART_028</a></td><td>Ledger category must be 'BAL' or 'VW'.</td>  <tr><td><a name=\"ART_029\">ART_029</a></td><td>The value of PriceExcl is below the minimum value of -999999999999.00.</td>  <tr><td><a name=\"ART_030\">ART_030</a></td><td>The value of PriceIncl is below the minimum value of -999999999999.00.</td>  <tr><td><a name=\"ART_031\">ART_031</a></td><td>The value of PriceIncl after applying VAT is below the minimum value of -999999999999.00.</td>  <tr><td><a name=\"ART_032\">ART_032</a></td><td>The value of PurchasePriceExcl is below the minimum value of -999999999999.00.</td>  <tr><td><a name=\"MUT_001\">MUT_001</a></td><td>Type is invalid.</td>  <tr><td><a name=\"MUT_002\">MUT_002</a></td><td>Invoice number is missing.</td>  <tr><td><a name=\"MUT_003\">MUT_003</a></td><td>Date is missing.</td>  <tr><td><a name=\"MUT_004\">MUT_004</a></td><td>Date is invalid.</td>  <tr><td><a name=\"MUT_005\">MUT_005</a></td><td>Period is closed.</td>  <tr><td><a name=\"MUT_007\">MUT_007</a></td><td>Unknown ledger for mutation.</td>  <tr><td><a name=\"MUT_008\">MUT_008</a></td><td>Unknown ledger category for mutation.</td>  <tr><td><a name=\"MUT_009\">MUT_009</a></td><td>Invalid ledger category for mutation.</td>  <tr><td><a name=\"MUT_010\">MUT_010</a></td><td>Ledger must be of category creditor.</td>  <tr><td><a name=\"MUT_011\">MUT_011</a></td><td>Ledger must be of category debtor.</td>  <tr><td><a name=\"MUT_012\">MUT_012</a></td><td>Relation is missing.</td>  <tr><td><a name=\"MUT_013\">MUT_013</a></td><td>Relation not found.</td>  <tr><td><a name=\"MUT_014\">MUT_014</a></td><td>Relation is prohibited.</td>  <tr><td><a name=\"MUT_015\">MUT_015</a></td><td>Term of payment is not permitted.</td>  <tr><td><a name=\"MUT_016\">MUT_016</a></td><td>Term of payment is prohibited.</td>  <tr><td><a name=\"MUT_017\">MUT_017</a></td><td>In/Ex VAT must be 'IN' or 'EX'.</td>  <tr><td><a name=\"MUT_018\">MUT_018</a></td><td>Invoice number is too long.</td>  <tr><td><a name=\"MUT_019\">MUT_019</a></td><td>Invoice number already exists.</td>  <tr><td><a name=\"MUT_020\">MUT_020</a></td><td>Combination relation/invoice number already exists.</td>  <tr><td><a name=\"MUT_021\">MUT_021</a></td><td>Date of opening balance must be before the first mutation.</td>  <tr><td><a name=\"MUT_022\">MUT_022</a></td><td>Date of mutation must be after the date of opening balance.</td>  <tr><td><a name=\"MUT_025\">MUT_025</a></td><td>Opening balance mutation must always be ID 0.</td>  <tr><td><a name=\"MUT_026\">MUT_026</a></td><td>In/Ex VAT must always be 'EX' on purchases with reverse-charging VAT.</td>  <tr><td><a name=\"MUT_050\">MUT_050</a></td><td>Unknown administration.</td>  <tr><td><a name=\"MUT_100\">MUT_100</a></td><td>Rows are missing.</td>  <tr><td><a name=\"MUT_101\">MUT_101</a></td><td>Too many rows.</td>  <tr><td><a name=\"MUT_104\">MUT_104</a></td><td>Unknown ledger for row.</td>  <tr><td><a name=\"MUT_105\">MUT_105</a></td><td>Unknown ledger category for row.</td>  <tr><td><a name=\"MUT_106\">MUT_106</a></td><td>Invalid ledger category for row.</td>  <tr><td><a name=\"MUT_107\">MUT_107</a></td><td>Ledger of row must be of category creditor.</td>  <tr><td><a name=\"MUT_108\">MUT_108</a></td><td>Ledger of row must be of category debtor.</td>  <tr><td><a name=\"MUT_109\">MUT_109</a></td><td>Invalid VAT code.</td>  <tr><td><a name=\"MUT_110\">MUT_110</a></td><td>VAT code must be of type purchase.</td>  <tr><td><a name=\"MUT_111\">MUT_111</a></td><td>VAT code must be of type sale.</td>  <tr><td><a name=\"MUT_112\">MUT_112</a></td><td>Relation is missing.</td>  <tr><td><a name=\"MUT_113\">MUT_113</a></td><td>Relation not found.</td>  <tr><td><a name=\"MUT_114\">MUT_114</a></td><td>Relation is not permitted.</td>  <tr><td><a name=\"MUT_115\">MUT_115</a></td><td>Invoice not found.</td>  <tr><td><a name=\"MUT_116\">MUT_116</a></td><td>Invoice is not permitted.</td>  <tr><td><a name=\"MUT_117\">MUT_117</a></td><td>Cost center not found.</td>  <tr><td><a name=\"MUT_118\">MUT_118</a></td><td>Ledger is not in balance.</td>  <tr><td><a name=\"MUT_120\">MUT_120</a></td><td>Invoice number is missing.</td>  <tr><td><a name=\"MUT_300\">MUT_300</a></td><td>Mutation not found.</td>  <tr><td><a name=\"MUT_901\">MUT_901</a></td><td>Not all ledgers exist.</td>  <tr><td><a name=\"MEM_001\">MEM_001</a></td><td>Member not found.</td>  <tr><td><a name=\"MEM_002\">MEM_002</a></td><td>Name is mandatory.</td>  <tr><td><a name=\"MEM_003\">MEM_003</a></td><td>Name is too long.</td>  <tr><td><a name=\"MEM_004\">MEM_004</a></td><td>Gender is invalid (m,v,a).</td>  <tr><td><a name=\"MEM_005\">MEM_005</a></td><td>Member number is invalid.</td>  <tr><td><a name=\"MEM_006\">MEM_006</a></td><td>Member number is too long.</td>  <tr><td><a name=\"MEM_007\">MEM_007</a></td><td>Iban is invalid.</td>  <tr><td><a name=\"MEM_010\">MEM_010</a></td><td>Salutation is too long.</td>  <tr><td><a name=\"MEM_011\">MEM_011</a></td><td>Address is too long.</td>  <tr><td><a name=\"MEM_012\">MEM_012</a></td><td>Postal code is too long.</td>  <tr><td><a name=\"MEM_013\">MEM_013</a></td><td>City is too long.</td>  <tr><td><a name=\"MEM_014\">MEM_014</a></td><td>Country is too long.</td>  <tr><td><a name=\"MEM_019\">MEM_019</a></td><td>Phone is too long.</td>  <tr><td><a name=\"MEM_020\">MEM_020</a></td><td>Mobile is too long.</td>  <tr><td><a name=\"MEM_021\">MEM_021</a></td><td>Fax is too long.</td>  <tr><td><a name=\"MEM_022\">MEM_022</a></td><td>Email is too long.</td>  <tr><td><a name=\"MEM_023\">MEM_023</a></td><td>Email is invalid.</td>  <tr><td><a name=\"MEM_024\">MEM_024</a></td><td>Email invoice is too long.</td>  <tr><td><a name=\"MEM_025\">MEM_025</a></td><td>Email invoice is invalid.</td>  <tr><td><a name=\"MEM_026\">MEM_026</a></td><td>Email reminder is too long.</td>  <tr><td><a name=\"MEM_027\">MEM_027</a></td><td>Email reminder is invalid.</td>  <tr><td><a name=\"MEM_029\">MEM_029</a></td><td>Iban is too long.</td>  <tr><td><a name=\"MEM_030\">MEM_030</a></td><td>Term of payment too low.</td>  <tr><td><a name=\"MEM_031\">MEM_031</a></td><td>Term of payment too high.</td>  <tr><td><a name=\"MEM_032\">MEM_032</a></td><td>BIC is too long.</td>  <tr><td><a name=\"MEM_033\">MEM_033</a></td><td>Mandate type is too long.</td>  <tr><td><a name=\"MEM_034\">MEM_034</a></td><td>Mandate ID is too long.</td>  <tr><td><a name=\"MEM_037\">MEM_037</a></td><td>Free text 1 is too long.</td>  <tr><td><a name=\"MEM_038\">MEM_038</a></td><td>Free text 2 is too long.</td>  <tr><td><a name=\"MEM_039\">MEM_039</a></td><td>Free text 3 is too long.</td>  <tr><td><a name=\"MEM_040\">MEM_040</a></td><td>Free text 4 is too long.</td>  <tr><td><a name=\"MEM_041\">MEM_041</a></td><td>Free text 5 is too long.</td>  <tr><td><a name=\"MEM_042\">MEM_042</a></td><td>Free text 6 is too long.</td>  <tr><td><a name=\"MEM_043\">MEM_043</a></td><td>Free text 7 is too long.</td>  <tr><td><a name=\"MEM_044\">MEM_044</a></td><td>Free text 8 is too long.</td>  <tr><td><a name=\"MEM_045\">MEM_045</a></td><td>Free text 9 is too long.</td>  <tr><td><a name=\"MEM_046\">MEM_046</a></td><td>Free text 10 is too long.</td>  <tr><td><a name=\"MEM_047\">MEM_047</a></td><td>Note too long.</td>  <tr><td><a name=\"MEM_048\">MEM_048</a></td><td>Ledger not found.</td>  <tr><td><a name=\"MEM_049\">MEM_049</a></td><td>Member number already exists.</td>  <tr><td><a name=\"MEM_051\">MEM_051</a></td><td>Mandate type is invalid (E,D).</td>  <tr><td><a name=\"MEM_052\">MEM_052</a></td><td>Mandate value is missing.</td>  <tr><td><a name=\"MEM_054\">MEM_054</a></td><td>Member ID is missing.</td>  <tr><td><a name=\"MEM_055\">MEM_055</a></td><td>Member not found.</td>  <tr><td><a name=\"MEM_056\">MEM_056</a></td><td>This endpoint is only available to clubs or associations.</td>  </table></div></details>
+ *
+ * The version of the OpenAPI document: v1
+ *
+ * Generated by: https://openapi-generator.tech
+ */
+
+use super::{Error, configuration};
+use crate::apis::ContentType;
+use crate::{apis::ResponseContent, models};
+use async_trait::async_trait;
+use reqwest;
+use serde::{Deserialize, Serialize, de::Error as _};
+use std::sync::Arc;
+
+#[async_trait]
+pub trait CostCenterApi: Send + Sync {
+    /// POST /v1/costcenter
+    ///
+    /// Create a new cost center.
+    async fn create_cost_center(
+        &self,
+        params: CreateCostCenterParams,
+    ) -> Result<models::CostCenterCreateResponse, Error<CreateCostCenterError>>;
+
+    /// DELETE /v1/costcenter/{id}
+    ///
+    /// Delete a cost center.
+    async fn delete_cost_center(
+        &self,
+        params: DeleteCostCenterParams,
+    ) -> Result<(), Error<DeleteCostCenterError>>;
+
+    /// GET /v1/costcenter/{id}
+    ///
+    /// Get a cost center.
+    async fn get_cost_center(
+        &self,
+        params: GetCostCenterParams,
+    ) -> Result<models::CostCenterResponse, Error<GetCostCenterError>>;
+
+    /// GET /v1/costcenter
+    ///
+    /// Get all cost centers.
+    async fn get_cost_centers(
+        &self,
+        params: GetCostCentersParams,
+    ) -> Result<models::CostCenterList, Error<GetCostCentersError>>;
+
+    /// PATCH /v1/costcenter/{id}
+    ///
+    /// Update a cost center.
+    async fn update_cost_center(
+        &self,
+        params: UpdateCostCenterParams,
+    ) -> Result<(), Error<UpdateCostCenterError>>;
+}
+
+pub struct CostCenterApiClient {
+    configuration: Arc<configuration::Configuration>,
+}
+
+impl CostCenterApiClient {
+    pub fn new(configuration: Arc<configuration::Configuration>) -> Self {
+        Self { configuration }
+    }
+}
+
+/// struct for passing parameters to the method [`CostCenterApi::create_cost_center`]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "bon", derive(::bon::Builder))]
+pub struct CreateCostCenterParams {
+    pub cost_center: Option<models::CostCenter>,
+}
+
+/// struct for passing parameters to the method [`CostCenterApi::delete_cost_center`]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "bon", derive(::bon::Builder))]
+pub struct DeleteCostCenterParams {
+    pub id: i32,
+}
+
+/// struct for passing parameters to the method [`CostCenterApi::get_cost_center`]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "bon", derive(::bon::Builder))]
+pub struct GetCostCenterParams {
+    pub id: i32,
+}
+
+/// struct for passing parameters to the method [`CostCenterApi::get_cost_centers`]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "bon", derive(::bon::Builder))]
+pub struct GetCostCentersParams {
+    /// The number of items to retrieve.
+    pub limit: Option<i32>,
+    /// The number of items to skip.
+    pub offset: Option<i32>,
+    /// The parent ID of the cost center.
+    pub parent_id: Option<String>,
+    /// The description of the cost center.
+    pub description: Option<String>,
+}
+
+/// struct for passing parameters to the method [`CostCenterApi::update_cost_center`]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "bon", derive(::bon::Builder))]
+pub struct UpdateCostCenterParams {
+    pub id: i32,
+    pub cost_center1: Option<models::CostCenter1>,
+}
+
+#[async_trait]
+impl CostCenterApi for CostCenterApiClient {
+    /// Create a new cost center.
+    async fn create_cost_center(
+        &self,
+        params: CreateCostCenterParams,
+    ) -> Result<models::CostCenterCreateResponse, Error<CreateCostCenterError>> {
+        let CreateCostCenterParams { cost_center } = params;
+
+        let local_var_configuration = &self.configuration;
+
+        let local_var_client = &local_var_configuration.client;
+
+        let local_var_uri_str = format!("{}/v1/costcenter", local_var_configuration.base_path);
+        let mut local_var_req_builder =
+            local_var_client.request(reqwest::Method::POST, local_var_uri_str.as_str());
+
+        if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
+            local_var_req_builder = local_var_req_builder
+                .header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
+        }
+        if let Some(ref local_var_apikey) = local_var_configuration.api_key {
+            let local_var_key = local_var_apikey.key.clone();
+            let local_var_value = match local_var_apikey.prefix {
+                Some(ref local_var_prefix) => format!("{} {}", local_var_prefix, local_var_key),
+                None => local_var_key,
+            };
+            local_var_req_builder = local_var_req_builder.header("Authorization", local_var_value);
+        };
+        local_var_req_builder = local_var_req_builder.json(&cost_center);
+
+        let local_var_req = local_var_req_builder.build()?;
+        let local_var_resp = local_var_client.execute(local_var_req).await?;
+
+        let local_var_status = local_var_resp.status();
+        let local_var_content_type = local_var_resp
+            .headers()
+            .get("content-type")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("application/octet-stream");
+        let local_var_content_type = super::ContentType::from(local_var_content_type);
+        let local_var_content = local_var_resp.text().await?;
+
+        if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
+            match local_var_content_type {
+                ContentType::Json => serde_json::from_str(&local_var_content).map_err(Error::from),
+                ContentType::Text => {
+                    return Err(Error::from(serde_json::Error::custom(
+                        "Received `text/plain` content type response that cannot be converted to `models::CostCenterCreateResponse`",
+                    )));
+                }
+                ContentType::Unsupported(local_var_unknown_type) => {
+                    return Err(Error::from(serde_json::Error::custom(format!(
+                        "Received `{local_var_unknown_type}` content type response that cannot be converted to `models::CostCenterCreateResponse`"
+                    ))));
+                }
+            }
+        } else {
+            let local_var_entity: Option<CreateCostCenterError> =
+                serde_json::from_str(&local_var_content).ok();
+            let local_var_error = ResponseContent {
+                status: local_var_status,
+                content: local_var_content,
+                entity: local_var_entity,
+            };
+            Err(Error::ResponseError(local_var_error))
+        }
+    }
+
+    /// Delete a cost center.
+    async fn delete_cost_center(
+        &self,
+        params: DeleteCostCenterParams,
+    ) -> Result<(), Error<DeleteCostCenterError>> {
+        let DeleteCostCenterParams { id } = params;
+
+        let local_var_configuration = &self.configuration;
+
+        let local_var_client = &local_var_configuration.client;
+
+        let local_var_uri_str = format!(
+            "{}/v1/costcenter/{id}",
+            local_var_configuration.base_path,
+            id = id
+        );
+        let mut local_var_req_builder =
+            local_var_client.request(reqwest::Method::DELETE, local_var_uri_str.as_str());
+
+        if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
+            local_var_req_builder = local_var_req_builder
+                .header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
+        }
+        if let Some(ref local_var_apikey) = local_var_configuration.api_key {
+            let local_var_key = local_var_apikey.key.clone();
+            let local_var_value = match local_var_apikey.prefix {
+                Some(ref local_var_prefix) => format!("{} {}", local_var_prefix, local_var_key),
+                None => local_var_key,
+            };
+            local_var_req_builder = local_var_req_builder.header("Authorization", local_var_value);
+        };
+
+        let local_var_req = local_var_req_builder.build()?;
+        let local_var_resp = local_var_client.execute(local_var_req).await?;
+
+        let local_var_status = local_var_resp.status();
+        let local_var_content = local_var_resp.text().await?;
+
+        if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
+            Ok(())
+        } else {
+            let local_var_entity: Option<DeleteCostCenterError> =
+                serde_json::from_str(&local_var_content).ok();
+            let local_var_error = ResponseContent {
+                status: local_var_status,
+                content: local_var_content,
+                entity: local_var_entity,
+            };
+            Err(Error::ResponseError(local_var_error))
+        }
+    }
+
+    /// Get a cost center.
+    async fn get_cost_center(
+        &self,
+        params: GetCostCenterParams,
+    ) -> Result<models::CostCenterResponse, Error<GetCostCenterError>> {
+        let GetCostCenterParams { id } = params;
+
+        let local_var_configuration = &self.configuration;
+
+        let local_var_client = &local_var_configuration.client;
+
+        let local_var_uri_str = format!(
+            "{}/v1/costcenter/{id}",
+            local_var_configuration.base_path,
+            id = id
+        );
+        let mut local_var_req_builder =
+            local_var_client.request(reqwest::Method::GET, local_var_uri_str.as_str());
+
+        if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
+            local_var_req_builder = local_var_req_builder
+                .header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
+        }
+        if let Some(ref local_var_apikey) = local_var_configuration.api_key {
+            let local_var_key = local_var_apikey.key.clone();
+            let local_var_value = match local_var_apikey.prefix {
+                Some(ref local_var_prefix) => format!("{} {}", local_var_prefix, local_var_key),
+                None => local_var_key,
+            };
+            local_var_req_builder = local_var_req_builder.header("Authorization", local_var_value);
+        };
+
+        let local_var_req = local_var_req_builder.build()?;
+        let local_var_resp = local_var_client.execute(local_var_req).await?;
+
+        let local_var_status = local_var_resp.status();
+        let local_var_content_type = local_var_resp
+            .headers()
+            .get("content-type")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("application/octet-stream");
+        let local_var_content_type = super::ContentType::from(local_var_content_type);
+        let local_var_content = local_var_resp.text().await?;
+
+        if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
+            match local_var_content_type {
+                ContentType::Json => serde_json::from_str(&local_var_content).map_err(Error::from),
+                ContentType::Text => {
+                    return Err(Error::from(serde_json::Error::custom(
+                        "Received `text/plain` content type response that cannot be converted to `models::CostCenterResponse`",
+                    )));
+                }
+                ContentType::Unsupported(local_var_unknown_type) => {
+                    return Err(Error::from(serde_json::Error::custom(format!(
+                        "Received `{local_var_unknown_type}` content type response that cannot be converted to `models::CostCenterResponse`"
+                    ))));
+                }
+            }
+        } else {
+            let local_var_entity: Option<GetCostCenterError> =
+                serde_json::from_str(&local_var_content).ok();
+            let local_var_error = ResponseContent {
+                status: local_var_status,
+                content: local_var_content,
+                entity: local_var_entity,
+            };
+            Err(Error::ResponseError(local_var_error))
+        }
+    }
+
+    /// Get all cost centers.
+    async fn get_cost_centers(
+        &self,
+        params: GetCostCentersParams,
+    ) -> Result<models::CostCenterList, Error<GetCostCentersError>> {
+        let GetCostCentersParams {
+            limit,
+            offset,
+            parent_id,
+            description,
+        } = params;
+
+        let local_var_configuration = &self.configuration;
+
+        let local_var_client = &local_var_configuration.client;
+
+        let local_var_uri_str = format!("{}/v1/costcenter", local_var_configuration.base_path);
+        let mut local_var_req_builder =
+            local_var_client.request(reqwest::Method::GET, local_var_uri_str.as_str());
+
+        if let Some(ref param_value) = limit {
+            local_var_req_builder =
+                local_var_req_builder.query(&[("limit", &param_value.to_string())]);
+        }
+        if let Some(ref param_value) = offset {
+            local_var_req_builder =
+                local_var_req_builder.query(&[("offset", &param_value.to_string())]);
+        }
+        if let Some(ref param_value) = parent_id {
+            local_var_req_builder =
+                local_var_req_builder.query(&[("parentId", &param_value.to_string())]);
+        }
+        if let Some(ref param_value) = description {
+            local_var_req_builder =
+                local_var_req_builder.query(&[("description", &param_value.to_string())]);
+        }
+        if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
+            local_var_req_builder = local_var_req_builder
+                .header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
+        }
+        if let Some(ref local_var_apikey) = local_var_configuration.api_key {
+            let local_var_key = local_var_apikey.key.clone();
+            let local_var_value = match local_var_apikey.prefix {
+                Some(ref local_var_prefix) => format!("{} {}", local_var_prefix, local_var_key),
+                None => local_var_key,
+            };
+            local_var_req_builder = local_var_req_builder.header("Authorization", local_var_value);
+        };
+
+        let local_var_req = local_var_req_builder.build()?;
+        let local_var_resp = local_var_client.execute(local_var_req).await?;
+
+        let local_var_status = local_var_resp.status();
+        let local_var_content_type = local_var_resp
+            .headers()
+            .get("content-type")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("application/octet-stream");
+        let local_var_content_type = super::ContentType::from(local_var_content_type);
+        let local_var_content = local_var_resp.text().await?;
+
+        if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
+            match local_var_content_type {
+                ContentType::Json => serde_json::from_str(&local_var_content).map_err(Error::from),
+                ContentType::Text => {
+                    return Err(Error::from(serde_json::Error::custom(
+                        "Received `text/plain` content type response that cannot be converted to `models::CostCenterList`",
+                    )));
+                }
+                ContentType::Unsupported(local_var_unknown_type) => {
+                    return Err(Error::from(serde_json::Error::custom(format!(
+                        "Received `{local_var_unknown_type}` content type response that cannot be converted to `models::CostCenterList`"
+                    ))));
+                }
+            }
+        } else {
+            let local_var_entity: Option<GetCostCentersError> =
+                serde_json::from_str(&local_var_content).ok();
+            let local_var_error = ResponseContent {
+                status: local_var_status,
+                content: local_var_content,
+                entity: local_var_entity,
+            };
+            Err(Error::ResponseError(local_var_error))
+        }
+    }
+
+    /// Update a cost center.
+    async fn update_cost_center(
+        &self,
+        params: UpdateCostCenterParams,
+    ) -> Result<(), Error<UpdateCostCenterError>> {
+        let UpdateCostCenterParams { id, cost_center1 } = params;
+
+        let local_var_configuration = &self.configuration;
+
+        let local_var_client = &local_var_configuration.client;
+
+        let local_var_uri_str = format!(
+            "{}/v1/costcenter/{id}",
+            local_var_configuration.base_path,
+            id = id
+        );
+        let mut local_var_req_builder =
+            local_var_client.request(reqwest::Method::PATCH, local_var_uri_str.as_str());
+
+        if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
+            local_var_req_builder = local_var_req_builder
+                .header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
+        }
+        if let Some(ref local_var_apikey) = local_var_configuration.api_key {
+            let local_var_key = local_var_apikey.key.clone();
+            let local_var_value = match local_var_apikey.prefix {
+                Some(ref local_var_prefix) => format!("{} {}", local_var_prefix, local_var_key),
+                None => local_var_key,
+            };
+            local_var_req_builder = local_var_req_builder.header("Authorization", local_var_value);
+        };
+        local_var_req_builder = local_var_req_builder.json(&cost_center1);
+
+        let local_var_req = local_var_req_builder.build()?;
+        let local_var_resp = local_var_client.execute(local_var_req).await?;
+
+        let local_var_status = local_var_resp.status();
+        let local_var_content = local_var_resp.text().await?;
+
+        if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
+            Ok(())
+        } else {
+            let local_var_entity: Option<UpdateCostCenterError> =
+                serde_json::from_str(&local_var_content).ok();
+            let local_var_error = ResponseContent {
+                status: local_var_status,
+                content: local_var_content,
+                entity: local_var_entity,
+            };
+            Err(Error::ResponseError(local_var_error))
+        }
+    }
+}
+
+/// struct for typed errors of method [`CostCenterApi::create_cost_center`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CreateCostCenterError {
+    Status400(models::Error),
+    Status401(),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`CostCenterApi::delete_cost_center`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum DeleteCostCenterError {
+    Status400(models::Error),
+    Status404(models::Error),
+    Status401(),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`CostCenterApi::get_cost_center`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GetCostCenterError {
+    Status404(models::Error),
+    Status401(),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`CostCenterApi::get_cost_centers`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GetCostCentersError {
+    Status401(),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`CostCenterApi::update_cost_center`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum UpdateCostCenterError {
+    Status400(models::Error),
+    Status404(models::Error),
+    Status401(),
+    UnknownValue(serde_json::Value),
+}
