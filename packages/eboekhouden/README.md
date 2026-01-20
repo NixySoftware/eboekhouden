@@ -12,6 +12,8 @@ cargo add eboekhouden
 
 ## Documentation
 
+Documentation for is available on [Docs.rs](https://docs.rs/eboekhouden/latest/eboekhouden/).
+
 ### Documentation for API Endpoints
 
 All URIs are relative to _https://api.e-boekhouden.nl_
@@ -131,4 +133,4 @@ All URIs are relative to _https://api.e-boekhouden.nl_
 
 ## License
 
-This project is available under the [MIT license](LICENSE.md).
+This project is available under the [MIT license](../../LICENSE.md).
