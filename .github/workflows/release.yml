@@ -18,6 +18,12 @@ permissions:
 jobs:
     release:
         name: Release
-        uses: NixySoftware/.github/.github/workflows/release.yml@d111cf0f030e8e9838dbc63fa137c18af021610c
+        uses: NixySoftware/.github/.github/workflows/release.yml@9704b92a2cefe90342562266d127a0c9dd132640 # v0.2.0
         with:
             bump: ${{ inputs.bump }}
+            bump-rust: true
+            bump-typescript: false
+            extract-version: 'rust'
+        secrets:
+            app-client-id: ${{ secrets.APP_ID }}
+            app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
